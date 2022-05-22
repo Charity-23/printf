@@ -1,3 +1,4 @@
+#include "main.h"
 
 /**
  * _printf - prints output to standard output
