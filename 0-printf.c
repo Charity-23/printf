@@ -9,153 +9,41 @@
  * null byte
  */
 
-int specifierscount = 0;
-char * specifiercodes;
-
 int _printf(const char *format, ...)
 {
-	_strlen(format);
-	int * codeptr = _charcode(format);
-	char* str1;
-        char str2;
+	int count = 0;
+	va_list args;
+	int (*function)(va_list) = NULL;
 
-	va_list ptr;
-	va_start(ptr, format);
-	for (int i = 0; i < specifierscount; i++)
+	va_start(args, format);
+	
+	while (*format)
 	{
-		if(specifiercodes[i] == 's')
+		if (*format == '%' && *(format + 1) != '%')
 		{
-			str1 = va_arg(ptr, char*);
-		}
-		else if(specifiercodes[i] == 'c')
-		{
-			str2 = va_arg(ptr, int);
-		}
-		else
-		{
-			continue;
-		}
-	}
-	va_end(ptr);
-
-	char * newstr = format;
-	int chardone = 0;
-        int stringdone = 0;
-	int percentdone = 0;
-
-	for(int j = 0; j < specifierscount; j++)
-	{
-		if(specifiercodes[j] == 's' && !stringdone)
-		{
-			codeptr = _charcode(newstr);
-			newstr = insertstr(newstr, *codeptr, str1);
-			specifierscount--;
-			stringdone = 1;
-		}
-		if(specifiercodes[j] == 'c' && !chardone)
-		{
-			char * strarr = _chartostring(str2);
-			codeptr = _charcode(newstr);
-			newstr = insertstr(newstr, *(codeptr), strarr);
-			specifierscount--;
-			chardone = 1;
-		}
-		if(specifiercodes[j] == '%' && !percentdone)
-		{
-			char * str3 = "%";
-
-			codeptr = _charcode(newstr);
-			newstr = insertstr(newstr, *(codeptr), str3);
-			specifierscount--;
-			percentdone = 1;
-		}
-	}
-
-	write(2, newstr, _strlen(newstr));
-
-	return (_strlen(newstr));
-}
-
-char * _chartostring(char c)
-{
-	char * str = malloc(sizeof(char));
-
-	str[0] = (char) c;
-
-	return(str);
-}
-
-
-char * insertstr(char * str, int start, char * strvar)
-{
-	int charsize = _strlen(strvar) + _strlen(str);
-	static char * charmem;
-	charmem = malloc(sizeof(char) * charsize);
-	int i = 0;
-	int l = 0;
-	int pause = 0;
-
-	for(;i < charsize; i++)
-	{
-		if(i == start)
-		{
-			pause = i;
-
-			for(; l < _strlen(strvar); l++)
+			format++;
+			function = get_function(format);
+			if (*(format) == '\0')
+				return (-1);
+			else if (function == NULL)
 			{
-				charmem[i] = strvar[l];
-				i++;
+				_putchar(*(format - 1));
+				_putchar(*format);
+				count += 2;
 			}
-			pause += 2;
+			else
+				count += function(args);
 		}
-		if(l != 0)
+		else if (*format == '%' && *(format + 1) == '%')
 		{
-			charmem[i] = str[pause];
-			pause++;
+			_putchar(*format);
+			count++;
 		}
-		else
-		{
-			charmem[i] = str[i];
-		}
+
+		format++;
 	}
-	return (charmem);
+	va_end(args);
+	return (count);
 }
 
-int * _charcode(char * str)
-{
-	int position = 0;
-	int * codes = malloc(sizeof(int) * specifierscount);
-	specifiercodes = malloc(sizeof(char) * specifierscount);
-	int insertPosition = 0;
 
-	while (str[position] != '\0')
-	{
-		if(str[position] == '%')
-		{
-			if(str[position+1] != ' ')
-			{
-				codes[insertPosition] = position;
-				specifiercodes[insertPosition] = str[position+1];
-				insertPosition++;
-			}
-		}
-		position++;
-	}
-	return (codes);
-}
-
-int _strlen(char * str)
-{
-	int len = 0;
-	static int var[2];
-
-	while (str[len] != '\0')
-	{
-		if(str[len] == '%' && str[len + 1] != ' ')
-		{
-			specifierscount++;
-		}
-		len++;
-	}
-	return (len);
-}
