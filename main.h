@@ -29,6 +29,28 @@ typedef struct buffer
 } buffer;
 
 /**
+ * struct cformat - structure for str length and format str count
+ * @len: contains str length
+ * @specifierscount: format character count
+ */
+struct cformat
+{
+	int len;
+	int specifierscount;
+}
+
+/**
+ * struct fcode - structure for format codes & it's position
+ * @specifiercodes: an array of included format codes
+ * @codes: int values of each code position
+ */
+struct fcode
+{
+	char * specifiercodes;
+	int * codes;
+}
+
+/**
  * struct handlers - handlers struct
  * @plus:'+' flag
  * @space:' ' flag
@@ -86,9 +108,8 @@ void _write_str(buffer *b_r, char *s);
 void _write_tmpbuf(buffer *b_r);
 int print_r(va_list list);
 
-int _strlen(char * str);
-int specifiercode(char c);
-int * _charcode(char * str);
+struct cformat _strlen(char * str);
+struct fcode _charcode(char * str, int count);
 char * insertstr(char * str, int start, char * strvar);
 char * _chartostring(char c);
 
